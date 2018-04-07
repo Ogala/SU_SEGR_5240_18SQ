@@ -325,6 +325,35 @@ namespace restapi.Controllers
             }
         }
 
+        [HttpDelete("{id}/deletion")]
+        [Produces(ContentTypes.Transition)]
+        [ProducesResponseType(typeof(Transition), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(MissingTransitionError), 409)]
+        public IActionResult Delete(string id){
+
+            Timecard timecard = Database.Find(id);
+
+            if(timecard != null){
+                if (timecard.Status == TimecardStatus.Cancelled || timecard.Status == TimecardStatus.Draft){
+
+                    var transition = timecard.Transitions
+                                        .Where(t => t.TransitionedTo == TimecardStatus.Deleted)
+                                        .OrderByDescending(t => t.OccurredAt)
+                                        .FirstOrDefault();
+
+                    return Ok(transition);
+                } else 
+                {
+                    return StatusCode(409, new MissingTransitionError() { });
+                }
+            } else
+            {
+                return NotFound();
+            }
+
+        }
+
         [HttpGet("{id}/approval")]
         [Produces(ContentTypes.Transition)]
         [ProducesResponseType(typeof(Transition), 200)]

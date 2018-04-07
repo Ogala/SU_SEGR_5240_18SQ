@@ -83,6 +83,14 @@ namespace restapi.Models
                         Relationship = ActionRelationship.RecordLine,
                         Reference = $"/timesheets/{Identity.Value}/lines"
                     });
+
+                    links.Add(new ActionLink() {
+                        Method = Method.Delete,
+                        Type = ContentTypes.Deletion,
+                        Relationship = ActionRelationship.Delete,
+                        Reference = $"/timesheets/{Identity.Value}/deletion"
+
+                    });
                 
                     break;
 
@@ -116,6 +124,15 @@ namespace restapi.Models
 
                 case TimecardStatus.Cancelled:
                     // terminal state, nothing possible here
+                    // it is now possible to remove a cancelled timecard
+
+                    links.Add(new ActionLink() {
+                        Method = Method.Delete,
+                        Type = ContentTypes.Deletion,
+                        Relationship = ActionRelationship.Delete,
+                        Reference = $"/timesheets/{Identity.Value}/deletion"
+
+                    });
                     break;
             }
 
