@@ -170,6 +170,15 @@ namespace restapi.Models
                 });
             }
 
+            if (this.Status == TimecardStatus.Draft || this.Status == TimecardStatus.Cancelled)
+            {
+                links.Add(new DocumentLink() {
+                    Method = Method.Delete,
+                    Type = ContentTypes.Transitions,
+                    Relationship = DocumentRelationship.Deletion,
+                    Reference = $"/timesheets/{Identity.Value}/deletion"
+                });
+            }
             return links;
         }
 

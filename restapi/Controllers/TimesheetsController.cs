@@ -100,6 +100,30 @@ namespace restapi.Controllers
                 return NotFound();
             }
         }
+
+        [HttpPost("{id}/replaceLines")]
+        [Produces(ContentTypes.TimesheetLine)]
+        [ProducesResponseType(typeof(AnnotatedTimecardLine), 200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(typeof(InvalidStateError), 409)]
+    
+        public IActionResult ReplaceLine(string id, [FromBody] TimecardLine line){
+            Timecard timecard = Database.Find(id);
+
+            if (timecard != null){
+                if (timecard.Status != TimecardStatus.Draft && timecard.Status != TimecardStatus.Approved)
+                    {
+                        return StatusCode(409, new InvalidStateError() { });
+                    }
+                    timecard.Lines.Clear();
+                    var annotatedLine = timecard.AddLine(line);
+                    return Ok(annotatedLine);
+                } 
+                else 
+                {
+                    return NotFound();
+                }
+        }
         
         [HttpGet("{id}/transitions")]
         [Produces(ContentTypes.Transitions)]
