@@ -377,6 +377,35 @@ namespace restapi.Controllers
 
         }
 
+        [HttpPatch("{id}/update")]
+        [Produces(ContentTypes.Update)]
+        [ProducesResponseType(200)]
+        [ProducesResponseType(404)]
+        [ProducesResponseType(409)]
+
+        public IActionResult UpdateTimesheet(string id, [FromBody] AnnotatedTimecardLine line){
+
+            Timecard timecard = Database.Find(id);
+            var itemId = line.RecordIdentity;
+            
+            if (timecard != null){
+                
+                if (timecard.Status == TimecardStatus.Draft || timecard.Status == TimecardStatus.Rejected){
+                    timecard.Actions.RemoveAt(itemId);
+                    var annotatedLine = line;
+                    timecard.AddLine(annotatedLine);
+                    return Ok(annotatedLine);
+                }else 
+                {
+                    return StatusCode(409, new EmptyTimecardError() { });
+                }
+            } else
+            {
+                return NotFound();
+            }
+            
+        }
+
         [HttpGet("{id}/approval")]
         [Produces(ContentTypes.Transition)]
         [ProducesResponseType(typeof(Transition), 200)]
