@@ -381,7 +381,7 @@ namespace restapi.Controllers
         [Produces(ContentTypes.Update)]
         [ProducesResponseType(200)]
         [ProducesResponseType(404)]
-        [ProducesResponseType(409)]
+        [ProducesResponseType(typeof(EmptyTimecardError), 409)]
 
         public IActionResult UpdateTimesheet(string id, [FromBody] AnnotatedTimecardLine line){
 
@@ -391,10 +391,12 @@ namespace restapi.Controllers
             if (timecard != null){
                 
                 if (timecard.Status == TimecardStatus.Draft || timecard.Status == TimecardStatus.Rejected){
+                    
                     timecard.Actions.RemoveAt(itemId);
-                    var annotatedLine = line;
-                    timecard.AddLine(annotatedLine);
-                    return Ok(annotatedLine);
+                    
+                    timecard.AddLine(line);
+                    
+                    return StatusCode(204);
                 }else 
                 {
                     return StatusCode(409, new EmptyTimecardError() { });
