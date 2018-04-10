@@ -332,9 +332,11 @@ namespace restapi.Controllers
         {
             Timecard timecard = Database.Find(id);
 
+            var resource = timecard.Resource;
+
             if (timecard != null)
             {
-                if (timecard.Status != TimecardStatus.Submitted)
+                if (timecard.Status != TimecardStatus.Submitted || resource == approval.Resource)
                 {
                     return StatusCode(409, new InvalidStateError() { });
                 }
@@ -351,21 +353,18 @@ namespace restapi.Controllers
 
         [HttpDelete("{id}/deletion")]
         [Produces(ContentTypes.Transition)]
-        [ProducesResponseType(typeof(Transition), 200)]
+        [ProducesResponseType(typeof(Transition), 204)]
         [ProducesResponseType(404)]
         [ProducesResponseType(typeof(MissingTransitionError), 409)]
-        public IActionResult Delete(string id){
+        public IActionResult Delete(string id, [FromBody] Deletion deletion){
 
             Timecard timecard = Database.Find(id);
 
             if(timecard != null){
                 if (timecard.Status == TimecardStatus.Cancelled || timecard.Status == TimecardStatus.Draft){
 
-                    var transition = timecard.Transitions
-                                        .Where(t => t.TransitionedTo == TimecardStatus.Deleted)
-                                        .OrderByDescending(t => t.OccurredAt)
-                                        .FirstOrDefault();
-
+                    var transition = new Transition(deletion, TimecardStatus.Deleted);
+                    timecard.Transitions.Add(transition);
                     return Ok(transition);
                 } else 
                 {
