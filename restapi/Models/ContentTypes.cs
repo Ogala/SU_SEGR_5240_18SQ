@@ -29,5 +29,7 @@ namespace restapi.Models
         public const string Approval = "application/com.my-company.my-product.timesheet-approval+json";
 
         public const string Deletion = "application/com.my-company.my-product.timesheet-deletion+json";
+
+        public const string Update = "application/com.my-company.my-product.timesheet-update+json";
     }
 }
